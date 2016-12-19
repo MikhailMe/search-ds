@@ -5,10 +5,21 @@ import java.util.Comparator;
 //TODO: write code here
 public class OpenHashTable<E extends Comparable<E>> implements ISet<E> {
 
+    private E[] table;
     private Comparator<E> comparator;
+    private static final int CAPACITY = 8;
+    private static float loadFactor;
+    private Object[] objectTable;
+    private int size;
 
     public OpenHashTable() {
-        this(null);
+        objectTable = new Object[CAPACITY];
+        loadFactor = 0.5f;
+        size = 0;
+    }
+
+    public E getElement(int hash){
+        return (E) objectTable[hash];
     }
 
     public OpenHashTable(Comparator<E> comparator) {
@@ -17,12 +28,12 @@ public class OpenHashTable<E extends Comparable<E>> implements ISet<E> {
 
     @Override
     public int size() {
-        return 0;
+        return size;
     }
 
     @Override
     public boolean isEmpty() {
-        return false;
+        return size == 0;
     }
 
     @Override
@@ -32,7 +43,10 @@ public class OpenHashTable<E extends Comparable<E>> implements ISet<E> {
 
     @Override
     public boolean add(E value) {
-        return false;
+        if (isEmpty()){
+
+        }
+        return true;
     }
 
     @Override
