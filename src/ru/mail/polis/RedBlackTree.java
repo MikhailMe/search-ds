@@ -119,12 +119,26 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
 
     @Override
     public T first() {
-        return min();
+        if (isEmpty()) {
+            throw new NoSuchElementException("Set is empty");
+        }
+        Node<T> curr = root;
+        while (curr.left != null) {
+            curr = curr.left;
+        }
+        return curr.value;
     }
 
     @Override
     public T last() {
-        return max();
+        if (isEmpty()) {
+            throw new NoSuchElementException("set is empty");
+        }
+        Node<T> curr = root;
+        while (curr.right != null) {
+            curr = curr.right;
+        }
+        return curr.value;
     }
 
     @Override
@@ -154,6 +168,9 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
 
     @Override
     public boolean add(T value) {
+        if (value == null) {
+            throw new NullPointerException("null");
+        }
         Node<T> Y = nil;
         Node<T> X = root;
         while (X != nil) {
@@ -181,7 +198,36 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
 
     @Override
     public boolean remove(T value) {
-        return remove(value);
+        if (value == null) {
+            throw new NullPointerException("null");
+        }
+        T data = (T) value;
+        Node<T> currentNode = root;
+        if (!contains(value)) return false;
+        while (currentNode != nil && currentNode.value.compareTo(value) != 0) {
+            if (currentNode.value.compareTo(value) < 0) currentNode = currentNode.right;
+            else currentNode = currentNode.left;
+        }
+        if(currentNode == nil) return false;
+        Node<T> Z = currentNode;
+        Node<T> Y;
+        if (Z.left == nil || Z.right == nil) Y = Z;
+        else Y = nextNode(Z);
+        Node<T> X = new Node<>();
+        if (Y.left != nil) X = Y.left;
+        else X = Y.right;
+        X.parent = Y.parent;
+        if (Y.parent == nil)
+            root = X;
+        else if (Y == Y.parent.left)
+            Y.parent.left = X;
+        else Y.parent.right = X;
+        if (Y != Z)
+            Z.value = Y.value;
+        if (Y.color().isBlack)
+            advancedTreeRepair(X);
+        size--;
+        return true;
     }
 
     private void addFixUp(Node<T> Z) {
@@ -223,6 +269,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
         root.color(Color.BLACK);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean remove(Object o) {
         T value = (T) o;
@@ -325,9 +372,18 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
 
     @Override
     public boolean contains(T value) {
-        return contains(value);
+        Node<T> currentNode = root;
+        while (currentNode != nil) {
+            if (currentNode.value.compareTo(value) > 0)
+                currentNode = currentNode.left;
+            else if (currentNode.value.compareTo(value) < 0)
+                currentNode = currentNode.right;
+            else return true;
+        }
+        return false;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean contains(Object o) {
         T value = (T) o;

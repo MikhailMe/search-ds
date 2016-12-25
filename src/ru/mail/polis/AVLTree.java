@@ -72,6 +72,9 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
     }
 
     private Node<T> insert(Node<T> current, T data, Node<T> parent) {
+        if (data == null) {
+            throw new NullPointerException("null");
+        }
         if (current == null) {
             size++;
             flag = true;
@@ -101,6 +104,9 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
     }
 
     private Node<T> delete(Node<T> current, T data) {
+        if (data == null) {
+            throw new NullPointerException("null");
+        }
         if (current == null){
             flag = false;
             return null;
@@ -328,6 +334,9 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
 
     @Override
     public boolean add(T value) {
+        if (value == null) {
+            throw new NullPointerException("null");
+        }
         root = insert(root, value, null);
         return flag;
     }
@@ -335,6 +344,9 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
     @SuppressWarnings("unchecked")
     @Override
     public boolean remove(Object value) {
+        if (value == null) {
+            throw new NullPointerException("null");
+        }
         root = delete(root, (T) value);
         if (flag) size--;
         return flag;
@@ -342,6 +354,9 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
 
     @Override
     public boolean remove(T value) {
+        if (value == null) {
+            throw new NullPointerException("null");
+        }
         root = delete(root, value);
         if (flag) size--;
         return flag;
