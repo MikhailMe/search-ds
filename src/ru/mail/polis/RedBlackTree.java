@@ -6,8 +6,8 @@ import java.util.*;
 public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
 
     private final Comparator<T> comparator;
-    private Node<T> nil = new Node<>();
-    private Node<T> root = nil;
+    private Node nil = new Node();
+    private Node root = nil;
     private int size = 0;
     public RedBlackTree() {
         this.comparator = null;
@@ -16,32 +16,41 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
         this.comparator = comparator;
     }
 
-    private void turnLeft(Node<T> X) {
-        Node<T> Y = X.right;
+    private void turnLeft(Node X) {
+        Node Y = X.right;
         X.right = Y.left;
-        if (Y.left != nil) Y.left.parent = X;
+        if (Y.left != nil)
+            Y.left.parent = X;
         Y.parent = X.parent;
-        if (X.parent == nil) root = Y;
-        else if (X == X.parent.left) X.parent.left = Y;
-        else X.parent.right = Y;
+        if (X.parent == nil)
+            root = Y;
+        else {
+            if (X == X.parent.left)
+                X.parent.left = Y;
+            else
+                X.parent.right = Y;
+        }
         Y.left = X;
         X.parent = Y;
     }
 
-    private void turnRight(Node<T> Y) {
-        Node<T> X = Y.left;
+    private void turnRight(Node Y) {
+        Node X = Y.left;
         Y.left = X.right;
         if (X.right != nil) X.right.parent = Y;
         X.parent = Y.parent;
         if (Y.parent == nil) root = X;
-        else if (Y == Y.parent.right) Y.parent.right = X;
-        else Y.parent.left = X;
+        else {
+            if (Y == Y.parent.right)
+                Y.parent.right = X;
+            else Y.parent.left = X;
+        }
         X.right = Y;
         Y.parent = X;
     }
 
-    private void print(Node<T> current, int level) {
-        if (current != null) {
+    private void print(Node current, int level) {
+        if (current.value != null) {
             print(current.right, level + 1);
             for (int i = 0; i < level; ++i)
                 System.out.print("\t");
@@ -54,7 +63,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
         print(root, 0);
     }
 
-    private Node<T> min(Node<T> current) {
+    private Node min(Node current) {
         if (current.left == null) return current;
         return min(current.left);
     }
@@ -64,7 +73,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
         return min(root).value;
     }
 
-    private Node<T> max(Node<T> current) {
+    private Node max(Node current) {
         if (current.right == null) return current;
         return max(current.right);
     }
@@ -76,7 +85,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
     @Override
     public T first() {
         if (isEmpty()) throw new NoSuchElementException("Set is empty");
-        Node<T> curr = root;
+        Node curr = root;
         while (curr.left.value != null)
             curr = curr.left;
         return curr.value;
@@ -85,7 +94,9 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
     @Override
     public T last() {
         if (isEmpty()) throw new NoSuchElementException("Set is empty");
-        Node<T> cur = root;
+        if (root.value.compareTo(root.right.value) > 0)
+            return root.value;
+        Node cur = root;
         while (cur.right.value != null)
             cur = cur.right;
         return cur.value;
@@ -97,7 +108,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
         return inOrder(root, list);
     }
 
-    private List<T> inOrder(Node<T> node, List<T> list) {
+    private List<T> inOrder(Node node, List<T> list) {
         if (node.value != null) {
             inOrder(node.left, list);
             list.add(node.value);
@@ -121,19 +132,20 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
         if (value == null) {
             throw new NullPointerException("null");
         }
-        Node<T> Y = nil;
-        Node<T> X = root;
+        Node Y = nil;
+        Node X = root;
         while (X != nil) {
             Y = X;
             Y.left = X.left;
             Y.right = X.right;
-            if (value.compareTo(X.value) < 0) X = X.left;
-            else if (value.compareTo(X.value) > 0) X = X.right;
+            int res = compare(value, X.value);
+            if (res < 0) X = X.left;
+            else if (res > 0) X = X.right;
             else return false;
         }
-        Node<T> Z = new Node<T>(value, Y, nil);
+        Node Z = new Node(value, Y, nil);
         if (Y == nil) root = Z;
-        else if (Z.value.compareTo(Y.value) < 0) {
+        else if (compare(Z.value,Y.value) < 0) {
             Y.left = Z;
         } else {
             Y.right = Z;
@@ -152,18 +164,19 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
             throw new NullPointerException("null");
         }
         T data = (T) value;
-        Node<T> currentNode = root;
+        Node currentNode = root;
         if (!contains(value)) return false;
-        while (currentNode != nil && currentNode.value.compareTo(value) != 0) {
-            if (currentNode.value.compareTo(value) < 0) currentNode = currentNode.right;
+        while (currentNode != nil && compare(currentNode.value,value) != 0) {
+            int res = compare(currentNode.value,value);
+            if (res < 0) currentNode = currentNode.right;
             else currentNode = currentNode.left;
         }
         if (currentNode == nil) return false;
-        Node<T> Z = currentNode;
-        Node<T> Y;
+        Node Z = currentNode;
+        Node Y;
         if (Z.left == nil || Z.right == nil) Y = Z;
         else Y = nextNode(Z);
-        Node<T> X = new Node<>();
+        Node X;
         if (Y.left != nil) X = Y.left;
         else X = Y.right;
         X.parent = Y.parent;
@@ -180,15 +193,15 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
         return true;
     }
 
-    private void addFixUp(Node<T> Z) {
+    private void addFixUp(Node Z) {
         while (Z.parent.color().isRed) {
             if (Z.parent.parent.left == Z.parent) {
-                Node<T> Y = Z.parent.parent.right;
+                Node Y = Z.parent.parent.right;
                 if (Y.color().isRed) {
                     Z.parent.color(Color.BLACK);
                     Y.color(Color.BLACK);
-                    Z.parent.parent.color(Color.RED);
                     Z = Z.parent.parent;
+                    Z.color(Color.RED);
                 } else {
                     if (Z == Z.parent.right) {
                         Z = Z.parent;
@@ -198,13 +211,13 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
                     Z.parent.parent.color(Color.RED);
                     turnRight(Z.parent.parent);
                 }
-            } else if (Z.parent.parent.right == Z.parent) {
-                Node<T> Y = Z.parent.parent.left;
+            } else {
+                Node Y = Z.parent.parent.left;
                 if (Y.color().isRed) {
                     Z.parent.color(Color.BLACK);
                     Y.color(Color.BLACK);
-                    Z.parent.parent.color(Color.RED);
                     Z = Z.parent.parent;
+                    Z.color(Color.RED);
                 } else {
                     if (Z == Z.parent.left) {
                         Z = Z.parent;
@@ -213,9 +226,9 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
                     Z.parent.color(Color.BLACK);
                     Z.parent.parent.color(Color.RED);
                     turnLeft(Z.parent.parent);
+                    }
                 }
             }
-        }
         root.color(Color.BLACK);
     }
 
@@ -253,11 +266,11 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
     }
 */
 
-    private Node<T> nextNode(Node<T> currentNode) {
+    private Node nextNode(Node currentNode) {
         if (currentNode.right != nil) {
             return min(currentNode.right);
         }
-        Node<T> tempNode = currentNode.parent;
+        Node tempNode = currentNode.parent;
         while (tempNode != nil && currentNode != tempNode.right) {
             currentNode = tempNode;
             tempNode = tempNode.parent;
@@ -265,8 +278,8 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
         return tempNode;
     }
 
-    private void advancedTreeRepair(Node<T> currentNode) {
-        Node<T> W;
+    private void advancedTreeRepair(Node currentNode) {
+        Node W;
         while (currentNode != root && currentNode.color().isBlack) {
             if (currentNode == currentNode.parent.left) {
                 W = currentNode.parent.right;
@@ -324,11 +337,12 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
 
     @Override
     public boolean contains(T value) {
-        Node<T> currentNode = root;
+        Node currentNode = root;
         while (currentNode != nil) {
-            if (currentNode.value.compareTo(value) > 0)
+            int res = compare(currentNode.value,value);
+            if (res > 0)
                 currentNode = currentNode.left;
-            else if (currentNode.value.compareTo(value) < 0)
+            else if (res < 0)
                 currentNode = currentNode.right;
             else return true;
         }
@@ -482,19 +496,20 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
         }
     }
 
-    class Node<T extends Comparable<T>> {
-        public Node<T> right;
-        public Node<T> left;
-        public Node<T> parent;
+    class Node {
+        public Node right;
+        public Node left;
+        public Node parent;
         public T value;
         private Color color;
 
-        public Node(T value, Node<T> parent, Node<T> nil) {
+        public Node(T value, Node parent, Node nil) {
             this.value = value;
             this.parent = parent;
             if (parent != nil) {
                 this.color = Color.RED;
-                if (this.value.compareTo(parent.value) > 0)
+                int res = compare(this.value, parent.value);
+                if (res > 0)
                     parent.right = this;
                 else
                     parent.left = this;
@@ -510,6 +525,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
             color = Color.BLACK;
         }
 
+
         public Color color() {
             return (value == null) ? Color.BLACK : color;
         }
@@ -524,11 +540,12 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
             result *= 31 + value.hashCode();
             return result;
         }
+
     }
 
     public class Iterator implements java.util.Iterator<T> {
-        private Node<T> it = nil;
-        private Stack<Node<T>> stack = new Stack<>();
+        private Node it = nil;
+        private Stack<Node> stack = new Stack<>();
 
         public Iterator() {
             it = root;

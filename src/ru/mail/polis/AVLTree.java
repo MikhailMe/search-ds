@@ -5,7 +5,7 @@ import java.util.*;
 public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
 
     private final Comparator<T> comparator;
-    private Node<T> root;
+    private Node root;
     private int size;
     private boolean flag = true;
 
@@ -19,19 +19,19 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
         this.comparator = comparator;
     }
 
-    private int maxDepth(Node<T> current) {
+    private int maxDepth(Node current) {
         if (current == null)
             return -1;
         return 1 + Math.max(maxDepth(current.left), maxDepth(current.left));
     }
 
-    private int minDepth(Node<T> current) {
+    private int minDepth(Node current) {
         if (current == null)
             return -1;
         return 1 + Math.min(minDepth(current.left), minDepth(current.right));
     }
 
-    private boolean isBalanced(Node<T> current) {
+    private boolean isBalanced(Node current) {
         return (maxDepth(current) - minDepth(current) <= 1);
     }
 
@@ -39,21 +39,21 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
         return isBalanced(root);
     }
 
-    private int height(Node<T> x, Node<T> y) {
+    private int height(Node x, Node y) {
         if (x == null && y == null) return 0;
         else if (x == null) return y.h;
         else if (y == null) return x.h;
         else return Math.max(x.h, y.h);
     }
 
-    private int balance(Node<T> x, Node<T> y) {
+    private int balance(Node x, Node y) {
         if (x == null && y == null) return 0;
         else if (x == null) return -y.h;
         else if (y == null) return x.h;
         else return x.h - y.h;
     }
 
-    private Node<T> min(Node<T> current) {
+    private Node min(Node current) {
         if (current.left == null) return current;
         return min(current.left);
     }
@@ -62,7 +62,7 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
         return root == null ? null : min(root).data;
     }
 
-    private Node<T> max(Node<T> current) {
+    private Node max(Node current) {
         if (current.right == null) return current;
         return max(current.right);
     }
@@ -71,16 +71,16 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
         return root == null ? null : max(root).data;
     }
 
-    private Node<T> insert(Node<T> current, T data, Node<T> parent) {
+    private Node insert(Node current, T data, Node parent) {
         if (data == null) {
             throw new NullPointerException("null");
         }
         if (current == null) {
             size++;
             flag = true;
-            return new Node<T>(data, parent);
+            return new Node(data, parent);
         }
-        int compareResult = data.compareTo(current.data);
+        int compareResult = compare(data,current.data);
         if (compareResult > 0) {
             current.right = insert(current.right, data, current);
             current.h = height(current.left, current.right) + 1;
@@ -103,12 +103,12 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
         root = insert(root, data, null);
     }
 
-    private Node<T> delete(Node<T> current, T data) {
+    private Node delete(Node current, T data) {
         if (data == null) {
             throw new NullPointerException("null");
         }
         if (current == null) return null;
-        int compareResult = data.compareTo(current.data);
+        int compareResult = compare(data,current.data);
         if (compareResult > 0)
             current.right = delete(current.right, data);
         else if (compareResult < 0)
@@ -130,7 +130,7 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
                     current.left.parent = current.right;
                     current = current.right;
                 } else {
-                    Node<T> result = min(current.right);
+                    Node result = min(current.right);
                     current.data = result.data;
                     delete(current.right, current.data);
                 }
@@ -151,13 +151,13 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
         root = delete(root, data);
     }
 
-    private Node<T> leftRotation(Node<T> current) {
+    private Node leftRotation(Node current) {
         if (current.right.right == null && current.right.left != null) {
             current.right = rightRotation(current.right);
             current = leftRotation(current);
         } else if (current.right.left == null ||
                 current.right.left.h <= current.right.right.h) {
-            Node<T> node = current.right;
+            Node node = current.right;
             node.parent = current.parent;
             current.right = node.left;
             if (current.right != null)
@@ -176,14 +176,14 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
         return current;
     }
 
-    private Node<T> rightRotation(Node<T> current) {
+    private Node rightRotation(Node current) {
         if (current.left.right != null &&
                 current.left.left == null) {
             current.left = leftRotation(current.left);
             current = rightRotation(current);
         } else if (current.left.right == null ||
                 current.left.right.h <= current.left.left.h) {
-            Node<T> node = current.left;
+            Node node = current.left;
             node.parent = current.parent;
             current.left = node.right;
             if (current.left != null)
@@ -205,7 +205,7 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
     @Override
     public T first() {
         if (isEmpty()) throw new NoSuchElementException("Set is empty");
-        Node<T> curr = root;
+        Node curr = root;
         while (curr.left != null)
             curr = curr.left;
         return curr.data;
@@ -214,7 +214,9 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
     @Override
     public T last() {
         if (isEmpty()) throw new NoSuchElementException("Set is empty");
-        Node<T> curr = root;
+        if (root.data.compareTo(root.right.data) > 0)
+            return root.data;
+        Node curr = root;
         while (curr.right != null)
             curr = curr.right;
         return curr.data;
@@ -226,7 +228,7 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
         return inOrder(root, list);
     }
 
-    private List<T> inOrder(Node<T> node, List<T> list) {
+    private List<T> inOrder(Node node, List<T> list) {
         if (node != null) {
             inOrder(node.left, list);
             list.add(node.data);
@@ -235,9 +237,9 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
         return list;
     }
 
-    private T find(Node<T> current, T data) {
+    private T find(Node current, T data) {
         if (current == null) return null;
-        int compareResult = data.compareTo(current.data);
+        int compareResult = compare(data,current.data);
         if (compareResult == 0)
             return current.data;
         else if (compareResult > 0)
@@ -249,7 +251,7 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
         return find(root, data);
     }
 
-    private void print(Node<T> current, int level) {
+    private void print(Node current, int level) {
         if (current != null) {
             print(current.right, level + 1);
             for (int i = 0; i < level; ++i)
@@ -354,7 +356,7 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
         return result;
     }
 
-    private boolean helpRemove(Node<T> node, T value){
+    private boolean helpRemove(Node node, T value){
         boolean result;
         if(node == null) {
             result = false;
@@ -457,14 +459,14 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
         return comparator == null ? v1.compareTo(v2) : comparator.compare(v1, v2);
     }
 
-    private class Node<T extends Comparable<T>> implements Comparable<T> {
+    private class Node {
 
         private T data;
         private int h;
         private int balance;
-        private Node<T> left;
-        private Node<T> right;
-        private Node<T> parent;
+        private Node left;
+        private Node right;
+        private Node parent;
 
         public Node() {
             this.data = null;
@@ -473,7 +475,7 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
             parent = this;
         }
 
-        public Node(T newData, Node<T> newParent) {
+        public Node(T newData, Node newParent) {
             this.data = newData;
             this.parent = newParent;
             this.left = null;
@@ -489,17 +491,12 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
             result *= data.hashCode();
             return result;
         }
-
-        @Override
-        public int compareTo(T o) {
-            return o.compareTo(data);
-        }
     }
 
     public class Iterator implements java.util.Iterator<T> {
 
-        private Node<T> it = null;
-        private Stack<Node<T>> stack = new Stack<>();
+        private Node it = null;
+        private Stack<Node> stack = new Stack<>();
 
         public Iterator() {
             it = root;
