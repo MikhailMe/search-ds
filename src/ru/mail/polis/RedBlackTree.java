@@ -93,16 +93,16 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
 
     @Override
     public List<T> inorderTraverse() {
-        List<T> list = new ArrayList<T>();
+        List<T> list = new ArrayList<>(size);
         return inOrder(root, list);
     }
 
     private List<T> inOrder(Node<T> node, List<T> list) {
-        if (root != null) {
+        if (node.value != null) {
             inOrder(node.left, list);
             list.add(node.value);
             inOrder(node.right, list);
-        }
+        } else return null;
         return list;
     }
 

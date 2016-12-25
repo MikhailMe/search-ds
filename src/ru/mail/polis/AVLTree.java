@@ -147,9 +147,8 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
         return current;
     }
 
-    public void delete(T data) {
+    private void delete(T data) {
         root = delete(root, data);
-        size--;
     }
 
     private Node<T> leftRotation(Node<T> current) {
