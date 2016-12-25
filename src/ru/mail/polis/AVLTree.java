@@ -202,14 +202,28 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
         return current;
     }
 
-    @Override
+   @Override
     public T first() {
-        return min();
+        if (isEmpty()) {
+            throw new NoSuchElementException("Set is empty");
+        }
+        Node<T> curr = root;
+        while (curr.left != null) {
+            curr = curr.left;
+        }
+        return curr.data;
     }
 
     @Override
     public T last() {
-        return max();
+        if (isEmpty()) {
+            throw new NoSuchElementException("set is empty");
+        }
+        Node<T> curr = root;
+        while (curr.right != null) {
+            curr = curr.right;
+        }
+        return curr.data;
     }
 
     @Override
