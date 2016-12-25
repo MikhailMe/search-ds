@@ -2,7 +2,7 @@ package ru.mail.polis;
 
 import java.util.*;
 
-public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collection<T> {
+public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
 
     private final Comparator<T> comparator;
     private Node<T> root;
@@ -107,20 +107,15 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
         if (data == null) {
             throw new NullPointerException("null");
         }
-        if (current == null){
-            flag = false;
-            return null;
-        }
+        if (current == null) return null;
         int compareResult = data.compareTo(current.data);
         if (compareResult > 0)
             current.right = delete(current.right, data);
         else if (compareResult < 0)
             current.left = delete(current.left, data);
         else {
-            if (current.right == null && current.left == null){
+            if (current.right == null && current.left == null)
                 current = null;
-                flag = true;
-            }
             else if (current.right == null) {
                 current.left.parent = current.parent;
                 current = current.left;
@@ -208,27 +203,21 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
         return current;
     }
 
-   @Override
+    @Override
     public T first() {
-        if (isEmpty()) {
-            throw new NoSuchElementException("Set is empty");
-        }
+        if (isEmpty()) throw new NoSuchElementException("Set is empty");
         Node<T> curr = root;
-        while (curr.left != null) {
+        while (curr.left != null)
             curr = curr.left;
-        }
         return curr.data;
     }
 
     @Override
     public T last() {
-        if (isEmpty()) {
-            throw new NoSuchElementException("set is empty");
-        }
+        if (isEmpty()) throw new NoSuchElementException("Set is empty");
         Node<T> curr = root;
-        while (curr.right != null) {
+        while (curr.right != null)
             curr = curr.right;
-        }
         return curr.data;
     }
 
@@ -285,17 +274,18 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
         return size == 0;
     }
 
-    @SuppressWarnings("unchecked")
+/*    @SuppressWarnings("unchecked")
     @Override
     public boolean contains(Object o) {
         return contains((T) o);
-    }
+    }*/
 
     @Override
     public boolean contains(T value) {
         return find((T) value) != null;
     }
 
+/*
     @Override
     public Iterator iterator() {
         return new Iterator();
@@ -331,9 +321,10 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
             return b;
         }
     }
+*/
 
     @Override
-    public boolean add(T value) {
+    public boolean add(T value) throws  NullPointerException{
         if (value == null) {
             throw new NullPointerException("null");
         }
@@ -341,6 +332,7 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
         return flag;
     }
 
+/*
     @SuppressWarnings("unchecked")
     @Override
     public boolean remove(Object value) {
@@ -351,18 +343,47 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
         if (flag) size--;
         return flag;
     }
+*/
 
     @Override
     public boolean remove(T value) {
         if (value == null) {
             throw new NullPointerException("null");
         }
-        root = delete(root, value);
-        if (flag) size--;
-        return flag;
+        boolean result = helpRemove(root, value);
+        if (result) size--;
+        return result;
     }
 
+    private boolean helpRemove(Node<T> node, T value){
+        boolean result;
+        if(node == null) {
+            result = false;
+        } else {
+            if(compare(node.data, value) > 0)  {
+                result = helpRemove(node.left, value);
+            } else if(compare(node.data, value) < 0) {
+                result = helpRemove(node.right, value);
+            } else {
+                delete(node.data);
+                result = true;
+            }
+        }
+        return result;
+    }
+
+/*    @SuppressWarnings("unchecked")
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o instanceof AVLTree) {
+            AVLTree<T> tree = (AVLTree<T>) o;
+            return (size == tree.size && containsAll(tree));
+        }
+        return false;
+    }*/
+
+/*    @Override
     public boolean containsAll(Collection<?> c) {
         for (Object it : c)
             if (!contains(it))
@@ -408,18 +429,7 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
     @Override
     public void clear() {
         this.forEach(this::remove);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o instanceof AVLTree) {
-            AVLTree<T> tree = (AVLTree<T>) o;
-            return (size == tree.size && containsAll(tree));
-        }
-        return false;
-    }
+    }*/
 
     @Override
     public int hashCode() {

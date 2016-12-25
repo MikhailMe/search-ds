@@ -3,71 +3,12 @@ package ru.mail.polis;
 import java.util.*;
 
 //TODO: write code here
-public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Collection<T> {
+public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
 
-    public enum Color {
-        BLACK(false),
-        RED(true);
-        public final boolean isRed;
-        public final boolean isBlack;
-
-        private Color(boolean value) {
-            this.isRed = value;
-            this.isBlack = !value;
-        }
-
-        public Color not() {
-            return this.isRed ? BLACK : RED;
-        }
-    }
-
-    class Node<T extends Comparable<T>> {
-        public Node<T> right;
-        public Node<T> left;
-        public Node<T> parent;
-        public T value;
-        private Color color;
-
-        public Node(T value, Node<T> parent, Node<T> nil){
-            this.value = value;
-            this.parent = parent;
-            if(parent != nil) {
-                this.color = Color.RED;
-                if(this.value.compareTo(parent.value) > 0)
-                    parent.right = this;
-                else
-                    parent.left = this;
-            }
-            else
-                this.color = Color.BLACK;
-        }
-        public Node() {
-            this.value = null;
-            parent = this;
-            left = this;
-            right = this;
-            color = Color.BLACK;
-        }
-        public Color color() {
-            return (value == null) ? Color.BLACK : color;
-        }
-        public void color(Color color){
-            this.color = color;
-        }
-
-        public int hashcode(){
-            int result = 26;
-            result *= 31 + color.hashCode();
-            result *= 31 + value.hashCode();
-            return result;
-        }
-    }
-
+    private final Comparator<T> comparator;
     private Node<T> nil = new Node<>();
     private Node<T> root = nil;
     private int size = 0;
-    private final Comparator<T> comparator;
-
     public RedBlackTree() {
         this.comparator = null;
     }
@@ -99,46 +40,55 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
         Y.parent = X;
     }
 
-    private Node<T> min(Node<T> current){
+    private void print(Node<T> current, int level) {
+        if (current != null) {
+            print(current.right, level + 1);
+            for (int i = 0; i < level; ++i)
+                System.out.print("\t");
+            System.out.println(current.value);
+            print(current.left, level + 1);
+        }
+    }
+
+    public void print() {
+        print(root, 0);
+    }
+
+    private Node<T> min(Node<T> current) {
         if (current.left == null) return current;
         return min(current.left);
     }
 
-    public T min(){
+    public T min() {
+        if (isEmpty()) throw new NoSuchElementException("Set is empty");
         return min(root).value;
     }
 
-    private Node<T> max(Node<T> current){
+    private Node<T> max(Node<T> current) {
         if (current.right == null) return current;
         return max(current.right);
     }
 
     public T max() {
-        return  max(root).value;
+        return max(root).value;
     }
 
     @Override
     public T first() {
-        if (isEmpty()) {
-            throw new NoSuchElementException("Set is empty");
-        }
+        if (isEmpty()) throw new NoSuchElementException("Set is empty");
         Node<T> curr = root;
-        while (curr.left != null) {
+        while (curr.left.value != null)
             curr = curr.left;
-        }
         return curr.value;
     }
 
     @Override
     public T last() {
-        if (isEmpty()) {
-            throw new NoSuchElementException("set is empty");
-        }
-        Node<T> curr = root;
-        while (curr.right != null) {
-            curr = curr.right;
-        }
-        return curr.value;
+        if (isEmpty()) throw new NoSuchElementException("Set is empty");
+        Node<T> cur = root;
+        while (cur.right.value != null)
+            cur = cur.right;
+        return cur.value;
     }
 
     @Override
@@ -147,8 +97,8 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
         return inOrder(root, list);
     }
 
-    private List<T> inOrder(Node<T> node, List<T> list){
-        if (root != null){
+    private List<T> inOrder(Node<T> node, List<T> list) {
+        if (root != null) {
             inOrder(node.left, list);
             list.add(node.value);
             inOrder(node.right, list);
@@ -208,7 +158,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
             if (currentNode.value.compareTo(value) < 0) currentNode = currentNode.right;
             else currentNode = currentNode.left;
         }
-        if(currentNode == nil) return false;
+        if (currentNode == nil) return false;
         Node<T> Z = currentNode;
         Node<T> Y;
         if (Z.left == nil || Z.right == nil) Y = Z;
@@ -269,6 +219,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
         root.color(Color.BLACK);
     }
 
+/*
     @SuppressWarnings("unchecked")
     @Override
     public boolean remove(Object o) {
@@ -279,7 +230,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
             if (currentNode.value.compareTo(value) < 0) currentNode = currentNode.right;
             else currentNode = currentNode.left;
         }
-        if(currentNode == nil) return false;
+        if (currentNode == nil) return false;
         Node<T> Z = currentNode;
         Node<T> Y;
         if (Z.left == nil || Z.right == nil) Y = Z;
@@ -300,6 +251,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
         size--;
         return true;
     }
+*/
 
     private Node<T> nextNode(Node<T> currentNode) {
         if (currentNode.right != nil) {
@@ -383,7 +335,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
         return false;
     }
 
-    @SuppressWarnings("unchecked")
+    /*@SuppressWarnings("unchecked")
     @Override
     public boolean contains(Object o) {
         T value = (T) o;
@@ -401,46 +353,6 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
     @Override
     public Iterator iterator() {
         return new Iterator();
-    }
-
-    public class Iterator implements java.util.Iterator<T> {
-        private Node<T> it = nil;
-        private Stack<Node<T>> stack = new Stack<>();
-
-        public Iterator() {
-            it = root;
-            if (it == nil) return;
-            stack.push(nil);
-            while (it.left != nil) {
-                stack.push(it);
-                it = it.left;
-            }
-        }
-
-        public Color color() {
-            return it.color();
-        }
-
-        @Override
-        public boolean hasNext() {
-            return it != nil;
-        }
-
-        @Override
-        public T next() {
-            T val;
-            if (it != nil)
-                val = it.value;
-            else throw new NoSuchElementException();
-            if (it.right != nil) {
-                it = it.right;
-                while (it.left != nil) {
-                    stack.push(it);
-                    it = it.left;
-                }
-            } else it = stack.pop();
-            return val;
-        }
     }
 
     @Override
@@ -487,7 +399,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
         int counter = this.size;
         for (Object it : c)
             add((T) it);
-        if(this.size > counter) return true;
+        if (this.size > counter) return true;
         else return false;
     }
 
@@ -497,7 +409,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
         for (Object it : c)
             if (contains(it))
                 remove((T) it);
-        if(this.size < counter)
+        if (this.size < counter)
             return true;
         else return false;
     }
@@ -514,7 +426,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
     }
 
     @Override
-    public void clear(){
+    public void clear() {
         this.forEach(this::remove);
     }
 
@@ -526,9 +438,9 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
             return (size == tree.size && containsAll(tree));
         }
         return false;
-    }
+    }*/
 
-    public int hashcode(){
+    public int hashcode() {
         int hashRoot = root.hashCode();
         boolean booleanValue = true;
         char charValue = 'd';
@@ -538,19 +450,119 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
         double doubleValue = 98584292348454.9834;
         byte[] arrayValue = {1, 2, 3};
         int result = 26 * hashRoot;
-        result = 26 * result + ( booleanValue ? 1 : 0 );
+        result = 26 * result + (booleanValue ? 1 : 0);
         result = 26 * result + (int) charValue;
         result = 26 * result + (stringValue == null ? 0 : stringValue.hashCode());
-        result = 26 * result + (int)(longValue - (longValue >>> 32));
+        result = 26 * result + (int) (longValue - (longValue >>> 32));
         result = 26 * result + Float.floatToIntBits(floatValue);
         long longBits = Double.doubleToLongBits(doubleValue);
-        result = 26 * result + (int)(longBits - (longBits >>> 32));
-        for( byte b : arrayValue )
+        result = 26 * result + (int) (longBits - (longBits >>> 32));
+        for (byte b : arrayValue)
             result = 26 * result + (int) b;
         return result;
     }
 
     private int compare(T v1, T v2) {
         return comparator == null ? v1.compareTo(v2) : comparator.compare(v1, v2);
+    }
+
+    public enum Color {
+        BLACK(false),
+        RED(true);
+        public final boolean isRed;
+        public final boolean isBlack;
+
+        private Color(boolean value) {
+            this.isRed = value;
+            this.isBlack = !value;
+        }
+
+        public Color not() {
+            return this.isRed ? BLACK : RED;
+        }
+    }
+
+    class Node<T extends Comparable<T>> {
+        public Node<T> right;
+        public Node<T> left;
+        public Node<T> parent;
+        public T value;
+        private Color color;
+
+        public Node(T value, Node<T> parent, Node<T> nil) {
+            this.value = value;
+            this.parent = parent;
+            if (parent != nil) {
+                this.color = Color.RED;
+                if (this.value.compareTo(parent.value) > 0)
+                    parent.right = this;
+                else
+                    parent.left = this;
+            } else
+                this.color = Color.BLACK;
+        }
+
+        public Node() {
+            this.value = null;
+            parent = this;
+            left = this;
+            right = this;
+            color = Color.BLACK;
+        }
+
+        public Color color() {
+            return (value == null) ? Color.BLACK : color;
+        }
+
+        public void color(Color color) {
+            this.color = color;
+        }
+
+        public int hashcode() {
+            int result = 26;
+            result *= 31 + color.hashCode();
+            result *= 31 + value.hashCode();
+            return result;
+        }
+    }
+
+    public class Iterator implements java.util.Iterator<T> {
+        private Node<T> it = nil;
+        private Stack<Node<T>> stack = new Stack<>();
+
+        public Iterator() {
+            it = root;
+            if (it == nil) return;
+            stack.push(nil);
+            while (it.left != nil) {
+                stack.push(it);
+                it = it.left;
+            }
+        }
+
+        public Color color() {
+            return it.color();
+        }
+
+        @Override
+        public boolean hasNext() {
+            return it != nil;
+        }
+
+        @Override
+        public T next() {
+            T val;
+            if (it != nil)
+                val = it.value;
+            else throw new NoSuchElementException();
+            if (it.right != nil) {
+                it = it.right;
+                while (it.left != nil) {
+                    stack.push(it);
+                    it = it.left;
+                }
+            } else it = stack.pop();
+            return val;
+        }
     }
 }
