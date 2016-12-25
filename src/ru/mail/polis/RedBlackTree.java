@@ -129,15 +129,15 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
 
     @Override
     public List<T> inorderTraverse() {
-        return inOrder(root);
+        List<T> list = new ArrayList<T>();
+        return inOrder(root, list);
     }
 
-    private List<T> inOrder(Node<T> node){
-        List<T> list = new ArrayList<T>();
+    private List<T> inOrder(Node<T> node, List<T> list){
         if (root != null){
-            inOrder(node.left);
+            inOrder(node.left, list);
             list.add(node.value);
-            inOrder(node.right);
+            inOrder(node.right, list);
         }
         return list;
     }
@@ -325,7 +325,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T>, Col
 
     @Override
     public boolean contains(T value) {
-        return false;
+        return contains(value);
     }
 
     @Override

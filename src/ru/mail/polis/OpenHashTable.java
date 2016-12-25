@@ -1,5 +1,6 @@
 package ru.mail.polis;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 
 //TODO: write code here
@@ -9,21 +10,27 @@ public class OpenHashTable<E extends Comparable<E>> implements ISet<E> {
     private Comparator<E> comparator;
     private static final int CAPACITY = 8;
     private static float loadFactor;
-    private Object[] objectTable;
     private int size;
 
     public OpenHashTable() {
-        objectTable = new Object[CAPACITY];
+        table = getData();
         loadFactor = 0.5f;
         size = 0;
     }
 
-    public E getElement(int hash){
-        return (E) objectTable[hash];
+    @SuppressWarnings("unchecked")
+    private E[] getData(E... empty) {
+        ArrayList<E> res = new ArrayList<>(CAPACITY);
+        return res.toArray(empty);
     }
 
     public OpenHashTable(Comparator<E> comparator) {
         this.comparator = comparator;
+    }
+
+    public void printHT(){
+        for (E elem : table)
+            System.out.println(elem);
     }
 
     @Override
@@ -43,9 +50,7 @@ public class OpenHashTable<E extends Comparable<E>> implements ISet<E> {
 
     @Override
     public boolean add(E value) {
-        if (isEmpty()){
-
-        }
+        table[0] = value;
         return true;
     }
 

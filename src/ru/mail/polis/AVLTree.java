@@ -1,51 +1,13 @@
 package ru.mail.polis;
 
-import java.sql.ResultSet;
 import java.util.*;
 
 public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collection<T> {
 
-    private class Node<T extends Comparable<T>> implements Comparable<T>{
-
-        private T data;
-        private int h;
-        private int balance;
-        private Node<T> left;
-        private Node<T> right;
-        private Node<T> parent;
-
-        public Node(){
-            this.data = null;
-            left = this;
-            right = this;
-            parent = this;
-        }
-        public Node(T newData, Node<T> newParent) {
-            this.data = newData;
-            this.parent = newParent;
-            this.left = null;
-            this.right = null;
-            this.h = 1;
-            this.balance = 0;
-        }
-
-        public int hashcode(){
-            int result = 26;
-            result *= this.h;
-            result *= this.balance;
-            result *= data.hashCode();
-            return result;
-        }
-
-        @Override
-        public int compareTo(T o) {
-            return o.compareTo(data);
-        }
-    }
-
+    private final Comparator<T> comparator;
     private Node<T> root;
     private int size;
-    private final Comparator<T> comparator;
+    private boolean flag = true;
 
     public AVLTree() {
         root = null;
@@ -57,61 +19,62 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
         this.comparator = comparator;
     }
 
-    private int maxDepth(Node<T> current){
+    private int maxDepth(Node<T> current) {
         if (current == null)
             return -1;
         return 1 + Math.max(maxDepth(current.left), maxDepth(current.left));
     }
 
-    private int minDepth(Node<T> current){
+    private int minDepth(Node<T> current) {
         if (current == null)
             return -1;
-        return 1 + Math.min(minDepth(current.left),minDepth(current.right));
+        return 1 + Math.min(minDepth(current.left), minDepth(current.right));
     }
 
-    private boolean isBalanced(Node<T> current){
+    private boolean isBalanced(Node<T> current) {
         return (maxDepth(current) - minDepth(current) <= 1);
     }
 
-    public boolean isBalanced(){
+    public boolean isBalanced() {
         return isBalanced(root);
     }
 
-    private int height(Node<T> x, Node<T> y){
+    private int height(Node<T> x, Node<T> y) {
         if (x == null && y == null) return 0;
         else if (x == null) return y.h;
         else if (y == null) return x.h;
         else return Math.max(x.h, y.h);
     }
 
-    private int balance(Node<T> x, Node<T> y){
+    private int balance(Node<T> x, Node<T> y) {
         if (x == null && y == null) return 0;
         else if (x == null) return -y.h;
         else if (y == null) return x.h;
         else return x.h - y.h;
     }
 
-    private Node<T> min(Node<T> current){
+    private Node<T> min(Node<T> current) {
         if (current.left == null) return current;
         return min(current.left);
     }
 
-    public T min(){
-        return min(root).data;
+    public T min() {
+        return root == null ? null : min(root).data;
     }
 
-    private Node<T> max(Node<T> current){
+    private Node<T> max(Node<T> current) {
         if (current.right == null) return current;
         return max(current.right);
     }
 
     public T max() {
-        return  max(root).data;
+        return root == null ? null : max(root).data;
     }
 
-    private Node<T> insert(Node<T> current,T data,Node<T> parent) {
-        if (current == null){
+    private Node<T> insert(Node<T> current, T data, Node<T> parent) {
+        if (current == null) {
             size++;
+            flag = true;
             return new Node<T>(data, parent);
         }
         int compareResult = data.compareTo(current.data);
@@ -121,7 +84,10 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
         } else if (compareResult < 0) {
             current.left = insert(current.left, data, current);
             current.h = height(current.left, current.right) + 1;
-        } else current.data = data;
+        } else {
+            current.data = data;
+            flag = false;
+        }
         current.balance = balance(current.left, current.right);
         if (current.balance == -2)
             current = leftRotation(current);
@@ -130,28 +96,33 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
         return current;
     }
 
-    public void insert(T data){
-        root = insert(root,data,null);
+    public void insert(T data) {
+        root = insert(root, data, null);
     }
 
-    private Node<T> delete(Node<T> current,T data){
-        if (current == null) return null;
+    private Node<T> delete(Node<T> current, T data) {
+        if (current == null){
+            flag = false;
+            return null;
+        }
         int compareResult = data.compareTo(current.data);
         if (compareResult > 0)
-            current.right = delete(current.right,data);
+            current.right = delete(current.right, data);
         else if (compareResult < 0)
-            current.left = delete(current.left,data);
-        else{
-            if (current.right == null &&current.left == null)
+            current.left = delete(current.left, data);
+        else {
+            if (current.right == null && current.left == null){
                 current = null;
-            else if (current.right == null){
+                flag = true;
+            }
+            else if (current.right == null) {
                 current.left.parent = current.parent;
                 current = current.left;
-            } else if (current.left == null){
+            } else if (current.left == null) {
                 current.right.parent = current.parent;
                 current = current.right;
             } else {
-                if (current.right.left == null){
+                if (current.right.left == null) {
                     current.right.left = current.left;
                     current.right.parent = current.parent;
                     current.right.parent = current.parent;
@@ -160,13 +131,13 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
                 } else {
                     Node<T> result = min(current.right);
                     current.data = result.data;
-                    delete(current.right,current.data);
+                    delete(current.right, current.data);
                 }
             }
         }
-        if (current != null){
-            current.h = height(current.left,current.right)+1;
-            current.h = balance(current.left,current.right);
+        if (current != null) {
+            current.h = height(current.left, current.right) + 1;
+            current.h = balance(current.left, current.right);
             if (current.balance == -2)
                 current = leftRotation(current);
             else if (current.balance == 2)
@@ -175,55 +146,55 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
         return current;
     }
 
-    public void delete(T data){
+    public void delete(T data) {
         root = delete(root, data);
         size--;
     }
 
-    private Node<T> leftRotation(Node<T> current){
-        if (current.right.right == null && current.right.left != null){
+    private Node<T> leftRotation(Node<T> current) {
+        if (current.right.right == null && current.right.left != null) {
             current.right = rightRotation(current.right);
             current = leftRotation(current);
         } else if (current.right.left == null ||
-                current.right.left.h <= current.right.right.h){
+                current.right.left.h <= current.right.right.h) {
             Node<T> node = current.right;
             node.parent = current.parent;
             current.right = node.left;
             if (current.right != null)
                 current.right.parent = current;
-            current.h = height(current.left,current.right)+1;
+            current.h = height(current.left, current.right) + 1;
             current.parent = node;
-            current.balance = balance(current.left,current.right);
+            current.balance = balance(current.left, current.right);
             node.left = current;
             current = node;
-            current.balance = balance(current.left,current.right);
-            current.h = height(current.left,current.right)+1;
-        } else{
+            current.balance = balance(current.left, current.right);
+            current.h = height(current.left, current.right) + 1;
+        } else {
             current.right = rightRotation(current.right);
             current = leftRotation(current);
         }
         return current;
     }
 
-    private Node<T> rightRotation(Node<T> current){
+    private Node<T> rightRotation(Node<T> current) {
         if (current.left.right != null &&
-                current.left.left == null){
+                current.left.left == null) {
             current.left = leftRotation(current.left);
             current = rightRotation(current);
         } else if (current.left.right == null ||
-                current.left.right.h <= current.left.left.h){
+                current.left.right.h <= current.left.left.h) {
             Node<T> node = current.left;
             node.parent = current.parent;
             current.left = node.right;
             if (current.left != null)
                 current.left.parent = current;
-            current.h = height(current.left,current.right)+1;
+            current.h = height(current.left, current.right) + 1;
             current.parent = node;
-            current.balance = balance(current.left,current.right);
+            current.balance = balance(current.left, current.right);
             node.right = current;
             current = node;
-            current.balance = balance(current.left,current.right);
-            current.h = height(current.left,current.right)+1;
+            current.balance = balance(current.left, current.right);
+            current.h = height(current.left, current.right) + 1;
         } else {
             current.left = leftRotation(current.left);
             current = rightRotation(current);
@@ -243,45 +214,45 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
 
     @Override
     public List<T> inorderTraverse() {
-        return inOrder(root);
+        List<T> list = new ArrayList<T>();
+        return inOrder(root, list);
     }
 
-    private List<T> inOrder(Node<T> node){
-        List<T> list = new ArrayList<T>();
-        if (node != null){
-            inOrder(node.left);
+    private List<T> inOrder(Node<T> node, List<T> list) {
+        if (node != null) {
+            inOrder(node.left, list);
             list.add(node.data);
-            inOrder(node.right);
+            inOrder(node.right, list);
         }
         return list;
     }
 
-    private T find(Node<T> current, T data){
+    private T find(Node<T> current, T data) {
         if (current == null) return null;
         int compareResult = data.compareTo(current.data);
         if (compareResult == 0)
             return current.data;
         else if (compareResult > 0)
-            return find(current.right,data);
-        else return find(current.left,data);
+            return find(current.right, data);
+        else return find(current.left, data);
     }
 
-    private T find(T data){
-        return find(root,data);
+    private T find(T data) {
+        return find(root, data);
     }
 
-    private void print(Node<T> current, int level){
-        if (current != null){
-            print(current.right,level+1);
+    private void print(Node<T> current, int level) {
+        if (current != null) {
+            print(current.right, level + 1);
             for (int i = 0; i < level; ++i)
                 System.out.print("\t");
             System.out.println(current.data);
-            print(current.left,level+1);
+            print(current.left, level + 1);
         }
     }
 
-    public void print(){
-        print(root,0);
+    public void print() {
+        print(root, 0);
     }
 
     @Override
@@ -294,19 +265,197 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
         return size == 0;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean contains(Object o) {
-        return false;
+        return contains((T) o);
     }
 
     @Override
     public boolean contains(T value) {
-        return find((T)value) != null ? true : false;
+        return find((T) value) != null;
     }
 
     @Override
     public Iterator iterator() {
         return new Iterator();
+    }
+
+    @Override
+    public Object[] toArray() {
+        Object[] result = new Object[size];
+        int index = 0;
+        for (T it : this) {
+            result[index] = it;
+            index++;
+        }
+        return result;
+    }
+
+    @Override
+    public <T1> T1[] toArray(T1[] a) {
+        if (a.length >= size) {
+            int index = 0;
+            for (T i : this) {
+                a[index] = (T1) i;
+                index++;
+            }
+            return a;
+        } else {
+            T1[] b = (T1[]) new Object[size];
+            int index = 0;
+            for (T i : this) {
+                b[index] = (T1) i;
+                index++;
+            }
+            return b;
+        }
+    }
+
+    @Override
+    public boolean add(T value) {
+        root = insert(root, value, null);
+        return flag;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean remove(Object value) {
+        root = delete(root, (T) value);
+        if (flag) size--;
+        return flag;
+    }
+
+    @Override
+    public boolean remove(T value) {
+        root = delete(root, value);
+        if (flag) size--;
+        return flag;
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        for (Object it : c)
+            if (!contains(it))
+                return false;
+        return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean addAll(Collection<? extends T> c) {
+        int counter = this.size;
+        for (Object it : c)
+            add((T) it);
+        if (this.size > counter)
+            return true;
+        else return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        int counter = this.size;
+        for (Object it : c)
+            if (contains(it))
+                remove((T) it);
+        if (this.size < counter)
+            return true;
+        else return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        int counter = this.size;
+        LinkedList list = new LinkedList();
+        for (T it : this)
+            if (!c.contains(it))
+                list.add(it);
+        removeAll(list);
+        return this.size < counter;
+    }
+
+    @Override
+    public void clear() {
+        this.forEach(this::remove);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o instanceof AVLTree) {
+            AVLTree<T> tree = (AVLTree<T>) o;
+            return (size == tree.size && containsAll(tree));
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hashRoot = root.hashCode();
+        boolean booleanValue = true;
+        char charValue = 'd';
+        String stringValue = "someTestForHashCode";
+        long longValue = 34829245849498300l;
+        float floatValue = 345832400.93f;
+        double doubleValue = 98584292348454.9834;
+        byte[] arrayValue = {1, 2, 3};
+        int result = 26 * hashRoot;
+        result = 26 * result + (booleanValue ? 1 : 0);
+        result = 26 * result + (int) charValue;
+        result = 26 * result + stringValue.hashCode();
+        result = 26 * result + (int) (longValue - (longValue >>> 32));
+        result = 26 * result + Float.floatToIntBits(floatValue);
+        long longBits = Double.doubleToLongBits(doubleValue);
+        result = 26 * result + (int) (longBits - (longBits >>> 32));
+        for (byte b : arrayValue)
+            result = 26 * result + (int) b;
+        return result;
+    }
+
+    private int compare(T v1, T v2) {
+        return comparator == null ? v1.compareTo(v2) : comparator.compare(v1, v2);
+    }
+
+    private class Node<T extends Comparable<T>> implements Comparable<T> {
+
+        private T data;
+        private int h;
+        private int balance;
+        private Node<T> left;
+        private Node<T> right;
+        private Node<T> parent;
+
+        public Node() {
+            this.data = null;
+            left = this;
+            right = this;
+            parent = this;
+        }
+
+        public Node(T newData, Node<T> newParent) {
+            this.data = newData;
+            this.parent = newParent;
+            this.left = null;
+            this.right = null;
+            this.h = 1;
+            this.balance = 0;
+        }
+
+        public int hashcode() {
+            int result = 26;
+            result *= this.h;
+            result *= this.balance;
+            result *= data.hashCode();
+            return result;
+        }
+
+        @Override
+        public int compareTo(T o) {
+            return o.compareTo(data);
+        }
     }
 
     public class Iterator implements java.util.Iterator<T> {
@@ -348,140 +497,5 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>, Collecti
         @Override
         public void remove() {
         }
-    }
-
-    @Override
-    public Object[] toArray() {
-        Object[] result = new Object[size];
-        int index = 0;
-        for (T it : this) {
-            result[index] = it;
-            index++;
-        }
-        return result;
-    }
-
-    @Override
-    public <T1> T1[] toArray(T1[] a) {
-        if (a.length >= size) {
-            int index = 0;
-            for (T i : this) {
-                a[index] = (T1) i;
-                index++;
-            }
-            return a;
-        } else {
-            T1[] b = (T1[]) new Object[size];
-            int index = 0;
-            for (T i : this) {
-                b[index] = (T1) i;
-                index++;
-            }
-            return b;
-        }
-    }
-
-    @Override
-    public boolean add(T value) {
-        if (find(value) != null)
-            return false;
-        insert(value);
-        return true;
-    }
-
-    @Override
-    public boolean remove(Object value) {
-        T temp = (T) value;
-        if (find(temp) == null)
-            return false;
-        delete(temp);
-        return true;
-    }
-
-    @Override
-    public boolean remove(T value) {
-        return remove(value);
-    }
-
-    @Override
-    public boolean containsAll(Collection<?> c) {
-        for (Object it : c)
-            if (!contains(it))
-                return false;
-        return true;
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends T> c) {
-        int counter = this.size;
-        for (Object it : c)
-            add((T) it);
-        if(this.size > counter)
-            return true;
-        else return false;
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> c) {
-        int counter = this.size;
-        for (Object it : c)
-            if (contains(it))
-                remove((T) it);
-        if(this.size < counter)
-            return true;
-        else return false;
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> c) {
-        int counter = this.size;
-        LinkedList list = new LinkedList();
-        for (T it : this)
-            if (!c.contains(it))
-                list.add(it);
-        removeAll(list);
-        return this.size < counter;
-    }
-
-    @Override
-    public void clear() {
-        this.forEach(this::remove);
-    }
-
-    @Override
-    public boolean equals(Object o){
-        if (this == o) return true;
-        if (o instanceof AVLTree) {
-            AVLTree<T> tree = (AVLTree<T>) o;
-            return (size == tree.size && containsAll(tree));
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode(){
-        int hashRoot = root.hashCode();
-        boolean booleanValue = true;
-        char charValue = 'd';
-        String stringValue = "someTestForHashCode";
-        long longValue = 34829245849498300l;
-        float floatValue = 345832400.93f;
-        double doubleValue = 98584292348454.9834;
-        byte[] arrayValue = {1, 2, 3};
-        int result = 26 * hashRoot;
-        result = 26 * result + ( booleanValue ? 1 : 0 );
-        result = 26 * result + (int) charValue;
-        result = 26 * result + (stringValue == null ? 0 : stringValue.hashCode());
-        result = 26 * result + (int)(longValue - (longValue >>> 32));
-        result = 26 * result + Float.floatToIntBits(floatValue);
-        long longBits = Double.doubleToLongBits(doubleValue);
-        result = 26 * result + (int)(longBits - (longBits >>> 32));
-        for( byte b : arrayValue )
-            result = 26 * result + (int) b;
-        return result;
-    }
-
-    private int compare(T v1, T v2) {
-        return comparator == null ? v1.compareTo(v2) : comparator.compare(v1, v2);
     }
 }
