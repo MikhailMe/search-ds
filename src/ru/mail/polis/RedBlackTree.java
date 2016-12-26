@@ -64,7 +64,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
     }
 
     private Node min(Node current) {
-        if (current.left == null) return current;
+        if (current.left == nil) return current;
         return min(current.left);
     }
 
@@ -74,7 +74,7 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
     }
 
     private Node max(Node current) {
-        if (current.right == null) return current;
+        if (current.right == nil) return current;
         return max(current.right);
     }
 

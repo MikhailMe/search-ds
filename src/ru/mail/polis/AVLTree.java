@@ -214,13 +214,26 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
     @Override
     public T last() {
         if (isEmpty()) throw new NoSuchElementException("Set is empty");
-        if (root.right.data != null)
+        return helpa(root);
+        /*if (root.right.data != null)
             if (compare(root.data,root.right.data) < 0)
                 return root.data;
         Node curr = root;
         while (curr.right != null)
             curr = curr.right;
-        return curr.data;
+        return curr.data;*/
+    }
+
+    private T helpa(Node cur){
+        if (cur.right != null){
+            int res = compare(cur.data, cur.right.data);
+            if (res > 0){
+                return cur.data;
+            } else if (res < 0){
+                cur.data = helpa(cur.right);
+            }
+        }
+        return cur.data;
     }
 
     @Override

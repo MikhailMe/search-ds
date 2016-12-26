@@ -1,46 +1,28 @@
 package ru.mail.polis;
 
-import java.util.Comparator;
-import java.util.TreeSet;
+import java.util.Random;
 
 public class Main {
 
     public static void main(String[] args) {
-        ISortedSet<Integer> set = new RedBlackTree<>();
-        TreeSet<Integer> treeSet = new TreeSet<>();
+        /*AVLTree<Integer> set = new AVLTree<>();
         for (int i = 0; i < 10; i++) {
             set.add(i);
-            treeSet.add(i);
-            assert set.size() == treeSet.size();
-            assert set.first().equals(treeSet.first());
-            assert set.last().equals(treeSet.last());
+            set.print();
+
+            System.out.println("last =" + set.last());
+            System.out.println("\n\n\n\n\n");
+        }*/
+
+
+        Random r = new Random();
+        ISortedSet<Integer> set = new RedBlackTree<Integer>();
+        for (int i = 0; i < 1000; i++) {
+            set.add(r.nextInt(1000));
         }
-        System.out.println();
-        System.out.println(set.inorderTraverse());
-        System.out.println(treeSet);
-        System.out.println();
-
-        for (int i = 0; i < 9; i++) {
-            assert set.remove(i) == treeSet.remove(i);
-            assert set.size() == treeSet.size();
-            assert set.first().equals(treeSet.first());
+        for (int i = 0; i < 1000; i++) {
+            set.remove(r.nextInt(1000));
         }
-
-        Comparator<Integer> EVEN_FIRST = (v1, v2) -> {
-            // Even first
-            final int c = Integer.compare(v1 % 2, v2 % 2);
-            return c != 0 ? c : Integer.compare(v1, v2);
-        };
-
-        ISortedSet<Integer> Set = new AVLTree<>(EVEN_FIRST);
-        Set.add(0);
-        Set.add(1);
-        Set.add(2);
-
-        System.out.println(Set.inorderTraverse());
-        System.out.println(Set.size());
-        System.out.println(Set.first());
-        System.out.println(Set.last());
 
     }
 
