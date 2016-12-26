@@ -15,7 +15,6 @@ public class Main {
             assert set.first().equals(treeSet.first());
             assert set.last().equals(treeSet.last());
         }
-
         System.out.println();
         System.out.println(set.inorderTraverse());
         System.out.println(treeSet);
@@ -25,7 +24,6 @@ public class Main {
             assert set.remove(i) == treeSet.remove(i);
             assert set.size() == treeSet.size();
             assert set.first().equals(treeSet.first());
-            assert set.last().equals(treeSet.last());
         }
 
         Comparator<Integer> EVEN_FIRST = (v1, v2) -> {

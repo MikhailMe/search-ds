@@ -94,8 +94,9 @@ public class RedBlackTree<T extends Comparable<T>> implements ISortedSet<T> {
     @Override
     public T last() {
         if (isEmpty()) throw new NoSuchElementException("Set is empty");
-        if (root.value.compareTo(root.right.value) > 0)
-            return root.value;
+        if (root.right != nil)
+            if (root.value.compareTo(root.right.value) > 0)
+                return root.value;
         Node cur = root;
         while (cur.right.value != null)
             cur = cur.right;
