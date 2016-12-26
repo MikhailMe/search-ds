@@ -214,8 +214,9 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
     @Override
     public T last() {
         if (isEmpty()) throw new NoSuchElementException("Set is empty");
-        if (root.data.compareTo(root.right.data) > 0)
-            return root.data;
+        if (root.right.data != null)
+            if (compare(root.data,root.right.data) < 0)
+                return root.data;
         Node curr = root;
         while (curr.right != null)
             curr = curr.right;

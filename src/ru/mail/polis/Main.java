@@ -32,12 +32,12 @@ public class Main {
             return c != 0 ? c : Integer.compare(v1, v2);
         };
 
-        RedBlackTree<Integer> Set = new RedBlackTree<>(EVEN_FIRST);
+        ISortedSet<Integer> Set = new AVLTree<>(EVEN_FIRST);
         Set.add(0);
         Set.add(1);
         Set.add(2);
-        Set.print();
 
+        System.out.println(Set.inorderTraverse());
         System.out.println(Set.size());
         System.out.println(Set.first());
         System.out.println(Set.last());
