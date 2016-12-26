@@ -227,10 +227,11 @@ public class AVLTree<T extends Comparable<T>> implements ISortedSet<T>{
     private T helpa(Node cur){
         if (cur.right != null){
             int res = compare(cur.data, cur.right.data);
-            if (res > 0){
-                return cur.data;
-            } else if (res < 0){
-                cur.data = helpa(cur.right);
+            if (res < 0){
+                //cur.data = helpa(cur.right);
+                Node a = new Node();
+                a.data = helpa(cur.right);
+                return a.data;
             }
         }
         return cur.data;
